@@ -1,0 +1,19 @@
+<!-- if you want to use a template tag library, load here too, just like every template-->
+{#{% load staticfiles %}#}
+{#{% load djangocrispyfiles %}#}
+
+<a href="{{ product.get_absolute_url }}"><div class="thumbnail text-center">
+    <h4>{{ product.title }}</h4>
+    {% if product.get_image_url %}
+        <img id="img" class="img-responsive" src="{{ product.get_image_url }}"/>
+    {% endif %}
+
+    <!-- to display Price, include with price="True" -->
+    {% if price %}
+        <!-- |safe for HTML safe code. We don't actually want to use it, use mark_safe from django.utils -->
+        {{ product.variation_set.first.get_html_price | safe }}
+    {% endif %}
+    <div class="caption">
+        <!-- could put title here if we wanted -->
+    </div>
+</div></a>

@@ -1,0 +1,25 @@
+/*Every time after changing this do: python manage.py collectstatic */
+
+.text-align-center {
+	text-align: center;
+}
+
+.og-price{
+	color:red;
+	text-decoration:line-through;
+}
+
+.my-navbar-cart{
+    font-size:18px;
+    vertical-align: middle;
+}
+
+.container-alert-flash{
+	position:absolute;
+	top:10px;
+	z-index:5000;
+	width:100%;
+	right:0%;
+	margin:0px;
+	display:none;
+}

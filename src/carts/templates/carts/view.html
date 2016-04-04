@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+<script>
+    {% block jquery %}
+        // when .item-qty is changed, it finds the next thing called ".btn-update" and fades it in
+        $('.item-qty').change(function(){
+            //$(this).next(".btn-update").fadeIn();  // don't need this since we update it with AJAX now
+            // orig from product_detail
+            // event.preventDefault();
+            //var item = $('#add-form').serialize() ; // serializes form data
+            var item = $(this).prev("input[type='hidden']").val(); // gets the previous matching elem
+            var qty = $(this).val();  // this is .item-qty. .val() is value of it
+            var data = {
+                item:item,
+                qty:qty
+            };
+            console.log(data);
+
+            $.ajax({
+                type:"GET",  //'post'
+                url:"{% url 'cart' %}",  // doesn't have to be a form
+                data: data,  // from the JSON returned from the backend
+                success: function(data){
+                    console.log(data);
+                    $('#jquery-message').text("Added "+data.item_added + " Deleted " + data.deleted);
+                    if(data.deleted){
+                        $('#item-'+item).fadeOut(); // item is actually the item id
+                        $('#subtotal').text(data.subtotal);  // updates subtotal after deleting an item
+                        $('#tax_total').text(data.tax_total);
+                        $('#cart_total').text(data.cart_total);
+                    }else{
+                        $('#item-line-total-'+item).text(data.line_total);
+                        $('#subtotal').text(data.subtotal);
+                        $('#tax_total').text(data.tax_total);
+                        $('#cart_total').text(data.cart_total);
+                    }
+                    if(data.total_items==0){
+                        $('.table').fadeOut();
+                        var template = "{% include 'carts/_empty_cart.html' %}";
+                        $('.main-content').html(template);
+                    }
+
+{#                    var message = "";#}
+{#                    if(data.item_added){#}
+{#                        message = "New item added"#}
+{#                    }else if(data.deleted){#}
+{#                        message = "Item deleted"#}
+{#                    }else{#}
+{#                        message = "item updated"#}
+{#                    }#}
+{#                    showFlashMessage(message); // from custom.js. or could (data.flash_message) from backend)#}
+                    updateCartItemCount();
+                    showFlashMessage(data.flash_message);
+                },
+                error: function(data){
+                    console.log(response);
+                    console.log(error);
+                    $("#add-form").submit();  // to continue the form as usual if there is an error with AJAX sub
+                }
+            })
+        });
+
+    {% endblock jquery %}
+</script>
+
+{% block content %}
+
+{#{{ object }}#}
+{##}
+{#{{ object.cartitem_set.all }}#}
+
+    <div class="row main-content">
+        <!-- test for items in cart -->
+        {% if object.cartitem_set.count >= 1 %}
+            <div class="col-sm-8 col-sm-offset-2">
+                <h1>Your cart</h1>
+                <table class="table">
+                {% for item in object.cartitem_set.all %}
+                    <tr id="item-{{ item.item.id }}">
+                        <td> {{ item.item.get_title }}</td>  <!-- get_title is in the variation -->
+                        <td> <!-- whole form inside this one TD-->
+                            <form action="." method="GET"><!-- action='.' is for this page -->
+                                <!-- need this in hidden field since when we update qty we need item id -->
+                                <input type="hidden" name="item" value="{{ item.item.id }}"/>
+                                <!-- sets to the new value, doesn't increment, just sets it -->
+                                <input class="item-qty" type="number" name="qty" value="{{ item.quantity }}">
+                                <input type="submit" class="btn-update btn btn-link" value="Update item" style="display:none"/>
+                             </form>
+                        </td>
+                        <td id="item-line-total-{{ item.item.id }}">{{ item.line_item_total }}</td>
+                        <td class="text-right"><a href="{{ item.remove }}">X</a></td> {# {{ item.item.remove_from_cart }} Same thing #}
+
+                    </tr>
+                {% endfor %}
+                    <tr><td colspan="4" class="text-right">Subtotal: <span id="subtotal">{{ object.subtotal }}</span></td></tr>
+                    <tr><td colspan="4" class="text-right">Est'd Taxes: <span id="tax_total">{{ object.tax_total }}</span></td></tr>
+                    <tr><td colspan="4" class="text-right">Total: <span id="cart_total">{{ object.total }}</span></td></tr>
+                    <tr><td colspan="4" class="text-right"><a class="btn btn-warning"href="{% url 'checkout' %}">Checkout</a></td></tr>
+                </table>
+            </div>
+        <!-- if there is nothing in the cart -->
+        {% else %}
+            {% include 'carts/_empty_cart.html' %}
+        {% endif %}
+    </div>
+
+{% endblock %}

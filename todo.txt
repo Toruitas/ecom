@@ -1,0 +1,16 @@
+1.products (physical)
+    -->see single product / detail view
+        * social sharing
+    -->list products
+    -->CRUD products aka inventory control
+    --> inventory viewable
+    --> search products
+2. checkout
+    --> cart(shopping cart)
+    -->auth users
+    --> anon users
+    --> shipping & billing addresses for each checkout
+3. payment
+    --> integration w/ braintree
+
+Digital products have a completely different way to how to securly sell them without people stealing them off your site

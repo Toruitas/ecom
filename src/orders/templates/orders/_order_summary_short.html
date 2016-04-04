@@ -1,0 +1,21 @@
+<p class="lead">
+    Your order
+</p>
+<table class="table">
+    <tr><td>{{ order.cart.cartitem_set.count }} Item(s):<br>{% for i in order.cart.cartitem_set.all %}
+        <b>{{ i.item.get_title }}</b>
+    {% endfor %}
+    </td></tr>
+    <tr><td>Subtotal: {{ order.cart.subtotal }}</td></tr>
+    <tr><td>Tax: {{ order.cart.tax_total }}</td></tr>
+    <tr><td>Items Total: {{ order.cart.total }}</td></tr>
+    <tr><td>Shipping: {{ order.shipping_total_price }}</td></tr>
+    <tr><td>Order Total: {{ order.order_total }}</td></tr>
+</table>
+
+<div class="col-sm-4 col-sm-offset-4 text-center">
+    <p><b>Billing to</b></p>
+    {{ order.billing_address.get_address }}<br/>
+    <p><b>Shipping to</b></p>
+    {{ order.shipping_address.get_address }}<br/>
+</div>

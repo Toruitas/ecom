@@ -1,0 +1,5 @@
+Before pushing, did you...
+
+collect static?
+makemigrations & migrate?
+add all apps to local, base, and production?

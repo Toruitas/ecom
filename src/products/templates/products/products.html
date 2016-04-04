@@ -1,0 +1,19 @@
+<div class="row">
+    {% for product in object_list %}
+        <div class="col-xs-2 {{ col_class_set }}">
+            {% include 'products/_product_thumbnail.html' with product=product price="True" %}
+        </div>
+
+        {% if not col_class_set %}
+        <!-- the blank '' are for skipped cycles, here we have 5 skipped and 1 do stuff -->
+        {% cycle '' '' '' '' '' '</div><div class="row">' %} <!-- could add <hr> inbetween -->
+        {% else %}
+        {% cycle '' '' '' '</div><div class="row">' %} <!-- for 4 -->
+        {% endif %}
+{#    <tr>#}
+{#        <td><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></td>#}
+{#        <td><a href="/products/{{ object.pk }}/">{{ object.title }}</a></td>#}
+{#        <td><a href='{% url "products:product_detail" pk=object.pk %}'>{{ object.title }}</a></td>#}
+{#    </tr>#}
+    {% endfor %}
+</div>

@@ -1,0 +1,8 @@
+bin/
+include/
+lib/
+.DS_STORE
+.Python
+info.txt
+venv/
+.sqlite3

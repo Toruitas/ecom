@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h3>{{ object }}</h3>
+
+    <div class="row">
+    {% for product in products %}
+        <div class="col-xs-2">
+            {% include 'products/_product_thumbnail.html' with product=product %}
+        </div>
+        <!-- the blank '' are for skipped cycles, here we have 5 skipped and 1 do stuff -->
+        {% cycle '' '' '' '' '' '</div><div class="row">' %} <!-- could add <hr> inbetween -->
+    {% endfor %}
+    </div>
+
+    {{ object.default_category.all }} <!-- whatever the related name is -->
+
+    {{ object.product_set.all }}
+
+
+
+{% endblock content %}

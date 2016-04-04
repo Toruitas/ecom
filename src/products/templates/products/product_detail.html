@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+<script> //script tags not strictly necc
+{% block jquery %}
+
+    function setPrice(){
+        var price = $('.variation-select option:selected').attr("data-price");
+
+        var sale_price = $('.variation-select option:selected').attr("data-sale-price");
+        if (sale_price !="" && sale_price != "None" && sale_price != null){  // so if no sale price, doesn't show
+            //$('#price').text(sale_price + " " + price); // show original price, maybe add strike through for it
+            $('#price').html("<h3>"+ sale_price + " <small class='og-price'>" + price + "</h3>");
+        }else{
+            $('#price').text(price);
+        }
+        {#            var img = $('.variation-select option:selected').attr("data-img");#}
+        {#            $('#img').attr("src", img);  // sets image src attr#}
+    }
+
+    setPrice();
+    $(".variation-select").change(function(){ // when thing with this class changes
+        setPrice()
+    });
+
+
+    // AJAX add to cart
+    $("#submit-btn").click(function(event){
+        // this would prevent the default action for the element, which in this case is to submit the form.
+        // If it was on the a href=, it just wouldn't go to the href
+        event.preventDefault();
+        var formData = $('#add-form').serialize() ; // serializes form data
+        console.log(formData);
+        $.ajax({
+            type:"GET",  //'post'
+            url:"{% url 'cart' %}",  // doesn't have to be a form
+            data: formData,
+            success: function(data){
+                console.log(data);
+                $('#jquery-message').text("Added "+data.item_added + " Deleted " + data.deleted)
+                showFlashMessage(data.flash_message); // from custom.js
+                updateCartItemCount();
+            },
+            error: function(data){
+{#                console.log(response);#}
+{#                console.log(error)#}
+                $("#add-form").submit();  // to continue the form as usual if there is an error with AJAX sub
+            }
+        })
+
+
+
+    });
+{% endblock %}
+</script>
+
+{% block content %}
+
+
+    <div class="row">
+        <!-- product details -->
+        <div class="col-sm-8">
+            <h2>{{ object.title }}</h2>
+            {% if object.get_image_url %}
+            <div>
+                <img id="img" class="img-responsive" src="{{ object.get_image_url }}"/>
+            </div>
+            {% endif %}
+{#            {% if object.productimage_set.count > 0 %}#}
+{#            <div>#}
+{#                {% for img in object.productimage_set.all %}#}
+{#                    {{ img.image.file }} <!-- where it's being stored -->#}
+{#                    {{ img.image.url }} <!-- where it's being served from -->#}
+{#                    <img id="img" class="img-responsive" src="{{ img.image.url }}">#}
+{#                {% endfor %}#}
+{#            </div>#}
+{#            {% endif %}#}
+            <p class="lead">{{ object.description }}</p>
+        </div>
+
+    <!-- product sidebar -->
+        <div class="col-sm-4">
+            <form id="add-form" method="GET" action="{% url 'cart' %}">
+            <p id="jquery-message" class="lead">
+
+            </p>
+                <!-- if more variations than just default, use select form -->
+                {% if object.variation_set.count > 1 %}
+                    <h3 id="price">{{ object.variation_set.first.price }}</h3>
+                    <select name='item' class="form-control variation-select">
+                    {% for variation_obj in object.variation_set.all %}
+                        <option data-img="SOURCE" data-sale-price="{{ variation_obj.sale_price }}" data-price="{{ variation_obj.price }}" value="{{ variation_obj.id }}">{{ variation_obj }}</option> <!--dataprice is arbitrary name-->
+                    {% endfor %}
+                    </select>
+                <!-- else if there is only one default-->
+                {% else %}
+                    <!-- this input here replaces the above select input, use hidden form -->
+                    <input type="hidden" name="item" value="{{ object.variation_set.first.id }}"/>
+                    <h3 id="price">
+                        {% if object.variation_set.first.sale_price %}{{ object.variation_set.first.sale_price }}
+                            <small class="og-price">{{ object.variation_set.first.price }}</small>
+                        {% else %}{{ object.variation_set.first.price }}
+                        {% endif %}
+                    </h3>
+                {% endif %}
+                <!-- quantity and submit -->
+                <input class='form-control' type="number" name="qty" value="1"/>
+                <br>
+
+                <input id="submit-btn" type="submit" class="btn btn-default" value="Add to cart">
+            </form>
+            <br>
+            <hr>
+            <p>
+                Share<br>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">
+                    <i class="fa fa-facebook-square fa-3x"></i>
+                </a>
+                <a href="#">
+                    <i class="fa fa-twitter-square fa-3x"></i>
+                </a>
+            </p>
+
+            <hr>
+            <h5>Related products</h5>
+            <div class="row">
+                {% for product in related %}
+                    <!-- product thumbnail using default image and title.  -->
+                    <div class="col-xs-6">
+                        {% include 'products/_product_thumbnail.html' with product=product price="True" %}
+                    </div>
+                    <!-- cycles row completion so each pair has own row-->
+                    {% cycle '' '</div><div class="row">' %}
+                {% endfor %}
+            </div>
+        </div>
+    <!-- end product sidebar -->
+    </div>
+
+{% endblock %}
